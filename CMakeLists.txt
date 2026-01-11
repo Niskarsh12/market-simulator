@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(market_sim
     src/main.cpp
     src/EventQueue.cpp
+    src/Simulator.cpp
 )
 
 target_include_directories(market_sim

@@ -1,20 +1,16 @@
 #include <iostream>
-#include "market/EventQueue.h"
+#include "market/Simulator.h"
 
 using namespace market;
 
 int main() {
-    EventQueue eq;
+    Simulator sim;
 
-    eq.push(Event(5.0, EventType::OrderArrival, 1));
-    eq.push(Event(1.0, EventType::Trade, 2));
-    eq.push(Event(3.0, EventType::AgentAction, 3));
+    sim.schedule(Event(5.0, EventType::OrderArrival, 1));
+    sim.schedule(Event(1.0, EventType::Trade, 2));
+    sim.schedule(Event(3.0, EventType::AgentAction, 3));
 
-    while (!eq.empty()) {
-        Event e = eq.pop();
-        std::cout << "Event id=" << e.id
-                  << " time=" << e.time << "\n";
-    }
+    sim.run();
 
     return 0;
 }
