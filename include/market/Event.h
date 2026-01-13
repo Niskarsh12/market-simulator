@@ -1,22 +1,30 @@
 #pragma once
 
-#include <cstdint>
-
 namespace market {
 
 enum class EventType {
     OrderArrival,
-    Trade,
-    AgentAction
+    Trade
+};
+
+enum class Side {
+    Buy,
+    Sell
 };
 
 struct Event {
-    double time;        // simulation time
-    EventType type;     // what kind of event
-    uint64_t id;        // unique id (for debugging)
+    double time;
+    EventType type;
+    Side side;
+    double price;
+    int quantity;
+    int id;
 
-    Event(double t, EventType tp, uint64_t i)
-        : time(t), type(tp), id(i) {}
+    Event(double t, EventType ty, Side s,
+          double p, int q, int id_)
+        : time(t), type(ty), side(s),
+          price(p), quantity(q), id(id_) {}
 };
 
-} // namespace market
+}
+
