@@ -1,8 +1,11 @@
 #pragma once
 
+#pragma once
+
 #include "EventQueue.h"
 #include "Event.h"
 #include "MarketState.h"
+
 #include <fstream>
 
 namespace market {
@@ -14,22 +17,23 @@ public:
 
     void schedule(const Event& e);
     void run();
-    void log_state();
 
+    // random market activity
+    void generate_random_orders(int count);
 
 private:
     double current_time;
     EventQueue event_queue;
     MarketState state;
+
     std::ofstream log_file;
-    // 👇 THESE TWO WERE MISSING
+
     void handle_event(const Event& e);
     void print_state(const Event& e) const;
+    void log_state();
 };
 
+} // namespace market
 
-
-
-}
 
 
