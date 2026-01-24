@@ -80,18 +80,22 @@ void Simulator::handle_event(const Event& e) {
             state.last_price = state.best_ask;
             state.best_ask = 0.0;
         } else {
-            state.best_bid = e.price;
+            if (state.best_bid == 0.0 || e.price > state.best_bid) {
+                state.best_bid = e.price;
+            }
         }
     } else { // Sell
         if (state.best_bid > 0 && e.price <= state.best_bid) {
             state.last_price = state.best_bid;
             state.best_bid = 0.0;
         } else {
-            state.best_ask = e.price;
+            if (state.best_ask == 0.0 || e.price < state.best_ask) {
+                state.best_ask = e.price;
+            }
         }
     }
 }
-
+    
 // ---------- logging ----------
 void Simulator::log_state() {
     log_file << current_time << ","
