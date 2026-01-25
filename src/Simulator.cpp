@@ -1,11 +1,13 @@
 #include "market/Simulator.h"
+
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 namespace market {
 
 // ---------- random helper ----------
-double random_double(double min, double max) {
+static double random_double(double min, double max) {
     static std::mt19937 rng(std::random_device{}());
     std::uniform_real_distribution<double> dist(min, max);
     return dist(rng);
@@ -58,7 +60,7 @@ void Simulator::generate_random_orders(int count) {
     }
 }
 
-// ---------- core loop ----------
+// ---------- core simulation loop ----------
 void Simulator::run() {
     while (!event_queue.empty()) {
         Event e = event_queue.pop();
@@ -70,48 +72,56 @@ void Simulator::run() {
     }
 }
 
-// ---------- market rules ----------
+// ---------- order book logic ----------
 void Simulator::handle_event(const Event& e) {
     if (e.type != EventType::OrderArrival)
         return;
 
+    // BUY order
     if (e.side == Side::Buy) {
-        if (state.best_ask > 0 && e.price >= state.best_ask) {
-            state.last_price = state.best_ask;
-            state.best_ask = 0.0;
+        if (!state.asks.empty() && e.price >= state.asks.front()) {
+            // trade at best ask
+            state.last_price = state.asks.front();
+            state.asks.erase(state.asks.begin());
         } else {
-            if (state.best_bid == 0.0 || e.price > state.best_bid) {
-                state.best_bid = e.price;
-            }
+            state.bids.push_back(e.price);
+            std::sort(state.bids.begin(), state.bids.end(), std::greater<>());
         }
-    } else { // Sell
-        if (state.best_bid > 0 && e.price <= state.best_bid) {
-            state.last_price = state.best_bid;
-            state.best_bid = 0.0;
+    }
+    // SELL order
+    else {
+        if (!state.bids.empty() && e.price <= state.bids.front()) {
+            // trade at best bid
+            state.last_price = state.bids.front();
+            state.bids.erase(state.bids.begin());
         } else {
-            if (state.best_ask == 0.0 || e.price < state.best_ask) {
-                state.best_ask = e.price;
-            }
+            state.asks.push_back(e.price);
+            std::sort(state.asks.begin(), state.asks.end());
         }
     }
 }
-    
-// ---------- logging ----------
+
+// ---------- CSV logging ----------
 void Simulator::log_state() {
+    double best_bid = state.bids.empty() ? 0.0 : state.bids.front();
+    double best_ask = state.asks.empty() ? 0.0 : state.asks.front();
+
     log_file << current_time << ","
-             << state.best_bid << ","
-             << state.best_ask << ","
+             << best_bid << ","
+             << best_ask << ","
              << state.last_price << "\n";
 }
 
-// ---------- debug ----------
+// ---------- console output ----------
 void Simulator::print_state(const Event& e) const {
-    std::cout << "[t=" << current_time << "] ";
+    double best_bid = state.bids.empty() ? 0.0 : state.bids.front();
+    double best_ask = state.asks.empty() ? 0.0 : state.asks.front();
 
-    std::cout << (e.side == Side::Buy ? "BUY " : "SELL ")
+    std::cout << "[t=" << current_time << "] "
+              << (e.side == Side::Buy ? "BUY " : "SELL ")
               << "@ " << e.price
-              << " | Bid: " << state.best_bid
-              << " Ask: " << state.best_ask
+              << " | Bid: " << best_bid
+              << " Ask: " << best_ask
               << " Last: " << state.last_price
               << "\n";
 }

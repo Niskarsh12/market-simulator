@@ -3,14 +3,10 @@
 namespace market {
 
 struct MarketState {
-    double best_bid;
-    double best_ask;
-    double last_price;
+    std::vector<double> bids;
+    std::vector<double> asks;
+    double last_price = 0.0;
 
-    MarketState()
-        : best_bid(0.0),
-          best_ask(0.0),
-          last_price(0.0) {}
 };
 
 }

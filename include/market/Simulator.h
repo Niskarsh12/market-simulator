@@ -1,6 +1,5 @@
 #pragma once
 
-#pragma once
 
 #include "EventQueue.h"
 #include "Event.h"
