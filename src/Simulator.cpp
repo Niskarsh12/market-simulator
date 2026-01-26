@@ -6,12 +6,6 @@
 
 namespace market {
 
-// ---------- random helper ----------
-static double random_double(double min, double max) {
-    static std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<double> dist(min, max);
-    return dist(rng);
-}
 
 // ---------- lifecycle ----------
 Simulator::Simulator()
@@ -27,48 +21,34 @@ Simulator::~Simulator() {
     }
 }
 
-// ---------- scheduling ----------
-void Simulator::schedule(const Event& e) {
-    event_queue.push(e);
-}
+// ------- agent registration ---------
 
-// ---------- random order flow ----------
-void Simulator::generate_random_orders(int count) {
-    double t = current_time;
-
-    for (int i = 0; i < count; i++) {
-        t += random_double(0.1, 1.0);
-
-        Side side = (random_double(0.0, 1.0) < 0.5)
-                        ? Side::Buy
-                        : Side::Sell;
-
-        double base_price = (state.last_price > 0.0)
-                                ? state.last_price
-                                : 100.0;
-
-        double price = base_price + random_double(-5.0, 5.0);
-
-        schedule(Event(
-            t,
-            EventType::OrderArrival,
-            side,
-            price,
-            1,
-            i
-        ));
-    }
+void Simulator::add_agent(std::unique_ptr<Agent>agent){
+    agents.push_back(std::move(agent));
 }
 
 // ---------- core simulation loop ----------
-void Simulator::run() {
-    while (!event_queue.empty()) {
-        Event e = event_queue.pop();
-        current_time = e.time;
 
-        handle_event(e);
+void Simulator::run(double end_time){
+    while (current_time < end_time) {
+
+        //ask each agent to act
+        for (auto& agent : agents) {
+            Event e =
+agent->act(current_time, state);
+           event_queue.push(e);            
+        }
+
+        if (event_queue.empty())
+            break;
+
+        // execute next event in time
+        Event ev = event_queue.pop();
+        current_time = ev.time;
+        
+        handle_event(ev);
         log_state();
-        print_state(e);
+        print_state(ev);
     }
 }
 

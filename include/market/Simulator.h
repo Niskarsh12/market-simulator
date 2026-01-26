@@ -4,6 +4,9 @@
 #include "EventQueue.h"
 #include "Event.h"
 #include "MarketState.h"
+#include "Agent.h"
+#include <memory>
+#include <vector>
 
 #include <fstream>
 
@@ -14,17 +17,16 @@ public:
     Simulator();
     ~Simulator();
 
-    void schedule(const Event& e);
-    void run();
+    void add_agent(std::unique_ptr<Agent>agent);
+    void run(double end_time);
 
-    // random market activity
-    void generate_random_orders(int count);
 
 private:
     double current_time;
     EventQueue event_queue;
     MarketState state;
 
+    std::vector<std::unique_ptr<Agent>>agents;
     std::ofstream log_file;
 
     void handle_event(const Event& e);

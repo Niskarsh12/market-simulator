@@ -10,6 +10,7 @@ add_executable(market_sim
     src/main.cpp
     src/EventQueue.cpp
     src/Simulator.cpp
+    src/NoiseAgent.cpp
 )
 
 target_include_directories(market_sim
