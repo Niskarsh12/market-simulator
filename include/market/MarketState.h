@@ -4,8 +4,8 @@
 namespace market {
 
 struct MarketState {
-    std::vector<double> bids;
-    std::vector<double> asks;
+    double best_bid = 0.0;
+    double best_ask = 0.0;
     double last_price = 0.0;
 
 };
